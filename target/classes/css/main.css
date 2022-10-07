@@ -1,0 +1,100 @@
+.root {
+    -fx-accent: #3b4148;
+    -fx-focus-color: #3b4148;
+}
+
+.title{
+    -fx-text-fill: #3b4148;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.description{
+    -fx-text-fill: #444b54;
+    -fx-font-size: 15px;
+}
+
+.button{
+    -fx-text-fill: #3b4148;
+    -fx-background-color: white;
+    -fx-font-size: 20px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+
+    -fx-padding: 10px;
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+}
+
+.button:hover, .choiceBox:hover, .field:hover, .checkBox .box:hover{
+    -fx-background-color: #eaeaea;
+}
+
+.field{
+    -fx-text-fill: #3b4148;
+    -fx-font-size: 15px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+
+    -fx-padding: 10px;
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+}
+
+.choiceBox{
+    -fx-text-fill: #3b4148;
+    -fx-background-color: white;
+    -fx-font-size: 15px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+
+    -fx-padding: 10px;
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+}
+
+.checkBox{
+    -fx-text-fill: #3b4148;
+    -fx-font-size: 15px;
+    -fx-padding: 10px;
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+}
+
+.checkBox .box {
+    -fx-background-color: white;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.vbox{
+    -fx-background-color: #b7c5c9;
+    -fx-padding: 10px;
+}
+
+.link{
+    -fx-text-fill: #504f62;
+}
+
+.mainVbox{
+    -fx-alignment: center;
+    -fx-padding: 20px;
+}
+
+.pushBtn{
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #33504F;
+    -fx-background-color: #BAFEDC;
+    -fx-border-color: #CEE0E0;
+    -fx-border-width: 2px;
+
+    -fx-border-radius: 25px;
+    -fx-background-radius: 25px;
+}
+
+.pushBtn:hover{
+    -fx-background-color: #E1FFFA;
+    -fx-text-fill: #335070;
+    -fx-border-color: #CADCE4;
+}
