@@ -1,10 +1,13 @@
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
+import java.io.IOException;
 
 public class GitClient {
     public final String PATH, URL;
@@ -15,6 +18,9 @@ public class GitClient {
 
     enum CloneStatus{ SUCCESS, UNAUTHORIZED, FOLDER_EXISTS, OTHER }
     enum PushStatus{ SUCCESS, INIT_REQUIRED }
+    enum MakeStatus{ SUCCESS, FOLDER_DOESNT_EXIST, NOT_A_REPO }
+    enum FetchStatus{ SUCCESS, INIT_REQUIRED, UNAUTHORIZED, OTHER }
+    enum PullStatus{ SUCCESS, INIT_REQUIRED, UNAUTHORIZED, OTHER }
 
     public GitClient(String localPath, String repoUrl) {
         this.PATH = localPath;
@@ -62,5 +68,47 @@ public class GitClient {
             return CloneStatus.OTHER;
         }
         return CloneStatus.SUCCESS;
+    }
+
+    public MakeStatus make(){
+        File repo = new File(PATH);
+        if(!repo.exists()) return MakeStatus.FOLDER_DOESNT_EXIST;
+        try {
+            this._git = Git.open(repo);
+        }catch(RepositoryNotFoundException e){
+            return MakeStatus.NOT_A_REPO;
+        }catch(IOException e){
+            return MakeStatus.FOLDER_DOESNT_EXIST;
+        }
+        return MakeStatus.SUCCESS;
+    }
+
+    public FetchStatus fetch(){
+        if(this._git == null) return FetchStatus.INIT_REQUIRED;
+        FetchCommand command = this._git.fetch();
+        command.setCredentialsProvider(this._credentials);
+        command.setRemote("origin");
+        try {
+            command.call();
+        }catch(TransportException | InvalidRemoteException e){
+            return FetchStatus.UNAUTHORIZED;
+        } catch (GitAPIException e) {
+            return FetchStatus.OTHER;
+        }
+        return FetchStatus.SUCCESS;
+    }
+
+    public PullStatus pull(){
+        if(this._git == null) return PullStatus.INIT_REQUIRED;
+        PullCommand command = this._git.pull();
+        command.setCredentialsProvider(this._credentials);
+        try {
+            command.call();
+        }catch(TransportException | InvalidRemoteException e){
+            return PullStatus.UNAUTHORIZED;
+        } catch (GitAPIException e) {
+            return PullStatus.OTHER;
+        }
+        return PullStatus.SUCCESS;
     }
 }

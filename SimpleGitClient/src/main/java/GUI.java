@@ -193,18 +193,20 @@ public class GUI extends Application {
         description.getStyleClass().add("description");
         children.add(description);
 
-        String[] repoNames = new String[repoList.size()];
-        for(int i = 0; i < repoNames.length; i++){
+        String[] repoNames = new String[repoList.size() + 1];
+        for(int i = 0; i < repoNames.length - 1; i++){
             repoNames[i] = repoList.get(i).getKey();
         }
+        repoNames[repoNames.length - 1] = "Local repository (from path)";
 
         ChoiceBox cb = new ChoiceBox();
         cb.getStyleClass().add("choiceBox");
         cb.setItems(FXCollections.observableArrayList(repoNames));
+        cb.getItems().add(repoNames.length - 1, new Separator());
         cb.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                _chosenRepoLink = repoList.get(t1.intValue()).getValue().replace("git://", "https://");
+                _chosenRepoLink = t1.intValue() == repoNames.length ? null : repoList.get(t1.intValue()).getValue().replace("git://", "https://");
             }
         });
         cb.getSelectionModel().select(0);
@@ -224,7 +226,7 @@ public class GUI extends Application {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 File f = new File(tf.getText());
-                if(f.exists() && f.isDirectory()){
+                if(f.exists() && f.isDirectory() && _chosenRepoLink != null){
                     Dialogs.makeConfirm("Folder already exists", "Delete it?", new Dialogs.ConfirmCallback() {
                         @Override
                         public void func(boolean result) {
@@ -242,19 +244,39 @@ public class GUI extends Application {
                 _git = new GitClient(tf.getText(), _chosenRepoLink);
                 _git.login(_username, _password);
 
-                switch (_git.cloneRepo()){
-                    case SUCCESS:
-                        //Dialogs.makeAlert(Alert.AlertType.INFORMATION, "successfully cloned repo", "");
-                        break;
-                    case FOLDER_EXISTS:
-                        //Dialogs.makeAlert(Alert.AlertType.ERROR, "Folder already exists", "");
-                        return;
-                    case UNAUTHORIZED:
-                        Dialogs.makeAlert(Alert.AlertType.ERROR, "Unauthorized", "Check your GitHub PAT expiration date and \"repo\" scope.");
-                        return;
-                    case OTHER:
-                        Dialogs.makeAlert(Alert.AlertType.ERROR, "Unexpected error", "");
-                        return;
+                if(_chosenRepoLink != null) {
+                    switch (_git.cloneRepo()) {
+                        case SUCCESS:
+                            break;
+                        case FOLDER_EXISTS:
+                            return;
+                        case UNAUTHORIZED:
+                            Dialogs.makeAlert(Alert.AlertType.ERROR, "Unauthorized", "Check your GitHub PAT expiration date and \"repo\" scope.");
+                            return;
+                        case OTHER:
+                            Dialogs.makeAlert(Alert.AlertType.ERROR, "Unexpected error", "");
+                            return;
+                    }
+                }else{
+                    switch(_git.make()){
+                        case SUCCESS:
+                            break;
+                        case FOLDER_DOESNT_EXIST:
+                        case NOT_A_REPO:
+                            Dialogs.makeAlert(Alert.AlertType.ERROR, "Not a Git repository", "The path provided is not a path of a valid Git repository.");
+                            return;
+                    }
+                    switch(_git.fetch()){
+                        case SUCCESS:
+                            break;
+                        case UNAUTHORIZED:
+                            Dialogs.makeAlert(Alert.AlertType.ERROR, "Unauthorized", "Check your GitHub PAT expiration date and \"repo\" scope.");
+                            return;
+                        case OTHER:
+                            Dialogs.makeAlert(Alert.AlertType.ERROR, "Unexpected error", "");
+                            return;
+                    }
+                    _git.pull();
                 }
 
                 _folder = tf.getText();
@@ -382,7 +404,7 @@ public class GUI extends Application {
         children.add(ideCB);
 
 
-        final Number[] folderIndex = {0};
+        final int[] folderIndex = {0};
 
         ArrayList<String> folders = new ArrayList<>();
         File repoFolder = new File(_folder);
@@ -400,7 +422,7 @@ public class GUI extends Application {
         folderCB.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                folderIndex[0] = t1;
+                folderIndex[0] = t1.intValue();
             }
         });
         folderCB.getSelectionModel().select(0);
@@ -412,7 +434,7 @@ public class GUI extends Application {
         openBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                Ide.open((Integer) ideIndex[0], _folder + "/" + (folderIndex[0].equals(0) ? "" : folders.get((Integer) folderIndex[0])));
+                Ide.open((Integer) ideIndex[0], _folder + "/" + (folderIndex[0] == 0 ? "" : folders.get(folderIndex[0])));
                 _stage.setScene(prev);
             }
         });

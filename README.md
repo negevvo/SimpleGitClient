@@ -28,8 +28,8 @@ To connect to GitHub, students would need to type their PATs once - and it'll be
 
 ***SimpleGitClient is a password-free, ZIP free, [copy, paste, delete, build, clean, reload, move, delete again, reboot, change configuration, reset, jump-out-of-the-window]-free , and a(n almost) problem-free solution for saving files!***
 
-## Limitaions and Problems (I'll be fixing them)
-- currently, you can only clone, but cannot fetch and pull from origin. That means you need to delete the project's folder every time you start the program (it's done automatically but still not so nice and can cause problems in the future).
+## Known issues
+- Please submit issues
 
 ## Can I help?
 Of course! Right now I'm looking for testers (high-school students and teachers are preferred), so feel free to test the app, recommend to your teachrs (or students, or friends), and open an issue or start a discussion. Thank you!
