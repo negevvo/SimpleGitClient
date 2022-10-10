@@ -14,7 +14,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.apache.commons.io.FileUtils;
@@ -33,7 +36,7 @@ public class GUI extends Application {
 
     private GitClient _git;
     private GitHubUser _ghUser;
-    private boolean _rememberMe = false;
+    private boolean _rememberMe = false, _saveToConnectedDevice = true;
 
     private String _chosenRepoLink, _folder;
     private boolean _autoPush = false;
@@ -94,9 +97,10 @@ public class GUI extends Application {
 
 
         String savedToken = SaveData.readFromConnectedDevice(Strings.GH_TOKEN_FILE);
+        String locallySavedToken = SaveData.read(Strings.GH_TOKEN_FILE);
+        if(!locallySavedToken.equals("")) _rememberMe = true;
         if(savedToken.equals("")){
-            savedToken = SaveData.read(Strings.GH_TOKEN_FILE);
-            if(!savedToken.equals("")) _rememberMe = true;
+            savedToken = locallySavedToken;
         }
 
         TextField tf = new TextField(savedToken);
@@ -128,6 +132,19 @@ public class GUI extends Application {
         });
         children.add(cb);
 
+        if(SaveData.isDeviceConnected()) {
+            CheckBox saveOnConnectedCB = new CheckBox("Save key to connected device (keep checked)");
+            saveOnConnectedCB.getStyleClass().add("checkBox");
+            saveOnConnectedCB.setSelected(_saveToConnectedDevice);
+            saveOnConnectedCB.selectedProperty().addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
+                    _saveToConnectedDevice = t1;
+                }
+            });
+            children.add(saveOnConnectedCB);
+        }
+
         Button btn = new Button(Strings.LOGIN_BTN_TEXT);
         btn.getStyleClass().add("button");
         btn.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -143,7 +160,7 @@ public class GUI extends Application {
                 _password = tf.getText();
 
                 _ghUser = new GitHubUser(_password);
-                SaveData.saveToConnectedDevice(Strings.GH_TOKEN_FILE, _password);
+                if(_saveToConnectedDevice) SaveData.saveToConnectedDevice(Strings.GH_TOKEN_FILE, _password);
                 if(_rememberMe) SaveData.save(Strings.GH_TOKEN_FILE, _password);
                 else if (!SaveData.read(Strings.GH_TOKEN_FILE).equals("")){
                     if(!SaveData.delete(Strings.GH_TOKEN_FILE)){
@@ -215,10 +232,36 @@ public class GUI extends Application {
         String savedPath = SaveData.read(Strings.PATH_FILE);
         if(savedPath.equals("")) savedPath = SaveData.DOCS_DIR + "/" + Strings.APP_FOLDER_NAME + "Projects";
 
+        HBox pathHBox = new HBox();
+        pathHBox.getStyleClass().add("pathHbox");
+
         TextField tf = new TextField(savedPath);
         tf.setPromptText(Strings.PATH_FIELD_HINT);
         tf.getStyleClass().add("field");
-        children.add(tf);
+        pathHBox.getChildren().add(tf);
+
+        Button browseBtn = new Button(Strings.BROWSE_BTN_TEXT);
+        browseBtn.getStyleClass().add("button");
+        browseBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                DirectoryChooser chooser = new DirectoryChooser();
+
+                File currentlyTypedFile = new File(tf.getText());
+                while(!currentlyTypedFile.exists()) currentlyTypedFile = currentlyTypedFile.getParentFile();
+
+                chooser.setInitialDirectory(currentlyTypedFile);
+
+                File f = chooser.showDialog(_stage);
+
+                if(f != null){
+                    tf.setText(f.getPath());
+                }
+            }
+        });
+        pathHBox.getChildren().add(browseBtn);
+
+        children.add(pathHBox);
 
         Button btn = new Button(Strings.NEXT_BTN_TEXT);
         btn.getStyleClass().add("button");

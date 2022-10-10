@@ -15,6 +15,7 @@ public class Strings {
             PATH_SCREEN_TITLE = "Choose path",
             PATH_SCREEN_DESCRIPTION = "Choose your project and enter the path where the local repo will be created:",
             PATH_FIELD_HINT = "Enter Path here",
+            BROWSE_BTN_TEXT = "Browse",
             MAIN_SCREEN_DESCRIPTION = "Click \"push\" to upload your changes, type if you want to add notes.",
             MESSAGE_FIELD_HINT = "Describe the changes you made (optional)",
             PUSH_BTN_TEXT = "Push",

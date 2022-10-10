@@ -72,6 +72,14 @@
     -fx-padding: 10px;
 }
 
+.pathHbox > .field{
+    -fx-pref-width: 500px;
+}
+
+.pathHbox > *{
+    -fx-font-size: 17px;
+}
+
 .link{
     -fx-text-fill: #504f62;
 }

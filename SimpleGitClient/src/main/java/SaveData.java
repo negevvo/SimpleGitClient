@@ -93,6 +93,10 @@ public class SaveData {
         return connectedDevices;
     }
 
+    public static boolean isDeviceConnected(){
+        return getConnectedDevices().size() > 0;
+    }
+
     public static boolean saveToConnectedDevice(String filename, String content){
         ArrayList<String> devices = getConnectedDevices();
         if(devices.size() <= 0) return false;
