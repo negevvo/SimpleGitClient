@@ -1,6 +1,8 @@
 import javafx.util.Pair;
 
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.File;
 
 public class Ide {
@@ -27,6 +29,14 @@ public class Ide {
                     try {
                         Desktop.getDesktop().open(new File(folderPath));
                     }catch (Exception e){ return false; }
+                    return true;
+                }
+            }),
+            new Pair<>("Copy path", new Opener() {
+                @Override
+                public boolean open(String folderPath) {
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clipboard.setContents(new StringSelection(folderPath), null);
                     return true;
                 }
             })

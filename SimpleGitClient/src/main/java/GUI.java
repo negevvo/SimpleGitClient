@@ -17,13 +17,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.apache.commons.io.FileUtils;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -210,27 +210,34 @@ public class GUI extends Application {
         description.getStyleClass().add("description");
         children.add(description);
 
+        String savedPath = SaveData.read(Strings.PATH_FILE);
+        if(savedPath.equals("")) savedPath = SaveData.DOCS_DIR + "\\" + Strings.APP_FOLDER_NAME + "Projects";
+
+
         String[] repoNames = new String[repoList.size() + 1];
         for(int i = 0; i < repoNames.length - 1; i++){
             repoNames[i] = repoList.get(i).getKey();
         }
         repoNames[repoNames.length - 1] = "Local repository (from path)";
 
-        ChoiceBox cb = new ChoiceBox();
-        cb.getStyleClass().add("choiceBox");
-        cb.setItems(FXCollections.observableArrayList(repoNames));
-        cb.getItems().add(repoNames.length - 1, new Separator());
-        cb.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        ChoiceBox repoCB = new ChoiceBox();
+        repoCB.getStyleClass().add("choiceBox");
+        repoCB.setItems(FXCollections.observableArrayList(repoNames));
+        repoCB.getItems().add(repoNames.length - 1, new Separator());
+        repoCB.getSelectionModel().selectFirst();
+        {
+            File temp = new File(savedPath);
+            if(temp.isDirectory() && temp.list((dir, name)->name.equals(".git")).length > 0) {
+                repoCB.getSelectionModel().selectLast();
+            }
+        }
+        repoCB.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
                 _chosenRepoLink = t1.intValue() == repoNames.length ? null : repoList.get(t1.intValue()).getValue().replace("git://", "https://");
             }
         });
-        cb.getSelectionModel().select(0);
-        children.add(cb);
-
-        String savedPath = SaveData.read(Strings.PATH_FILE);
-        if(savedPath.equals("")) savedPath = SaveData.DOCS_DIR + "/" + Strings.APP_FOLDER_NAME + "Projects";
+        children.add(repoCB);
 
         HBox pathHBox = new HBox();
         pathHBox.getStyleClass().add("pathHbox");
@@ -270,7 +277,7 @@ public class GUI extends Application {
             public void handle(MouseEvent mouseEvent) {
                 File f = new File(tf.getText());
                 if(f.exists() && f.isDirectory() && _chosenRepoLink != null){
-                    Dialogs.makeConfirm("Folder already exists", "Delete it?", new Dialogs.ConfirmCallback() {
+                    Dialogs.makeConfirm("Folder already exists", "Delete it?\n(If you already cloned this repository, try the \"Local repository\" option)", new Dialogs.ConfirmCallback() {
                         @Override
                         public void func(boolean result) {
                             if(result){
@@ -477,7 +484,7 @@ public class GUI extends Application {
         openBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                Ide.open((Integer) ideIndex[0], _folder + "/" + (folderIndex[0] == 0 ? "" : folders.get(folderIndex[0])));
+                Ide.open((Integer) ideIndex[0], _folder + "\\" + (folderIndex[0] == 0 ? "" : folders.get(folderIndex[0])));
                 _stage.setScene(prev);
             }
         });
