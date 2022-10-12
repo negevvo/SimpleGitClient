@@ -6,6 +6,7 @@ public class Strings {
             APP_FOLDER_NAME = "SimpleGitClient",
             WELCOME_SCREEN_TITLE = "Welcome!",
             WELCOME_SCREEN_DESCRIPTION = "This is a simple Git client for Github users :)\n",
+            PROJECT_GITHUB_TEXT = "Visit the project's GitHub page",
             NEXT_BTN_TEXT = "Next",
             LOGIN_GH_TOKEN_HINT = "GitHub access token",
             LOGIN_SCREEN_TITLE = "Login",

@@ -67,6 +67,19 @@ public class GUI extends Application {
         description.getStyleClass().add("description");
         children.add(description);
 
+        Hyperlink link = new Hyperlink();
+        link.setText(Strings.PROJECT_GITHUB_TEXT);
+        link.getStyleClass().add("link");
+        link.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI("https://github.com/negevvo/SimpleGitClient"));
+                } catch (Exception ignored) {}
+            }
+        });
+        children.add(link);
+
         Button btn = new Button(Strings.NEXT_BTN_TEXT);
         btn.getStyleClass().add("button");
         btn.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -78,6 +91,7 @@ public class GUI extends Application {
         children.add(btn);
 
         Scene s = new Scene(vbox, 600, 400);
+        btn.requestFocus();
         s.getStylesheets().add(getClass().getResource("css/main.css").toExternalForm());
         return s;
     }
@@ -437,34 +451,23 @@ public class GUI extends Application {
         description.getStyleClass().add("description");
         children.add(description);
 
-        String[] ideNames = Ide.getIdeNames();
+        final ArrayList<Ide>[] ides = new ArrayList[1];
 
-        final Number[] ideIndex = {0};
-
-        ChoiceBox ideCB = new ChoiceBox();
-        ideCB.getStyleClass().add("choiceBox");
-        ideCB.setItems(FXCollections.observableArrayList(ideNames));
-        ideCB.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                ideIndex[0] = t1;
-            }
-        });
-        ideCB.getSelectionModel().select(0);
-        children.add(ideCB);
-
-
-        final int[] folderIndex = {0};
+        final String[] chosenFolder = new String[1];
 
         ArrayList<String> folders = new ArrayList<>();
         File repoFolder = new File(_folder);
 
         File[] files = repoFolder.listFiles();
         folders.add("Repository (as one project)");
-        if(files != null)
-            for(File f : files){
-                if(f.isDirectory() && !f.getName().equals(".git")) folders.add(f.getName());
+        if(files != null) {
+            for (File f : files) {
+                if (f.isDirectory() && !f.getName().equals(".git")) folders.add(f.getName());
             }
+        }
+
+        ChoiceBox ideCB = new ChoiceBox();
+        final int[] sepIndex = new int[1];
 
         ChoiceBox folderCB = new ChoiceBox();
         folderCB.getStyleClass().add("choiceBox");
@@ -472,19 +475,35 @@ public class GUI extends Application {
         folderCB.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                folderIndex[0] = t1.intValue();
+                chosenFolder[0] = _folder + "\\" + (t1.intValue() == 0 ? "" : folders.get(t1.intValue()));
+                ides[0] = Ide.getIdes(chosenFolder[0]);
+
+                ideCB.setItems(FXCollections.observableArrayList(ides[0]));
+                sepIndex[0] = ides[0].size() - 2;
+                if(sepIndex[0] != 0) ideCB.getItems().add(sepIndex[0], new Separator());
+                ideCB.getSelectionModel().selectFirst();
             }
         });
-        folderCB.getSelectionModel().select(0);
+        folderCB.getSelectionModel().selectFirst();
         children.add(folderCB);
 
+        final int[] ideIndex = {0};
+
+        ideCB.getStyleClass().add("choiceBox");
+        ideCB.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                ideIndex[0] = t1.intValue() + (t1.intValue() > sepIndex[0] ? -1 : 0);
+            }
+        });
+        children.add(ideCB);
 
         Button openBtn = new Button(Strings.OPEN_BTN_TEXT);
         openBtn.getStyleClass().add("button");
         openBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                Ide.open((Integer) ideIndex[0], _folder + "\\" + (folderIndex[0] == 0 ? "" : folders.get(folderIndex[0])));
+                Ide.open(ides[0].get(ideIndex[0]), chosenFolder[0]);
                 _stage.setScene(prev);
             }
         });
