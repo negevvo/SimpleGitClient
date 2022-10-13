@@ -238,6 +238,12 @@ public class GUI extends Application {
         repoCB.getStyleClass().add("choiceBox");
         repoCB.setItems(FXCollections.observableArrayList(repoNames));
         repoCB.getItems().add(repoNames.length - 1, new Separator());
+        repoCB.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                _chosenRepoLink = t1.intValue() == repoNames.length ? null : repoList.get(t1.intValue()).getValue().replace("git://", "https://");
+            }
+        });
         repoCB.getSelectionModel().selectFirst();
         {
             File temp = new File(savedPath);
@@ -245,12 +251,6 @@ public class GUI extends Application {
                 repoCB.getSelectionModel().selectLast();
             }
         }
-        repoCB.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                _chosenRepoLink = t1.intValue() == repoNames.length ? null : repoList.get(t1.intValue()).getValue().replace("git://", "https://");
-            }
-        });
         children.add(repoCB);
 
         HBox pathHBox = new HBox();
@@ -277,6 +277,9 @@ public class GUI extends Application {
 
                 if(f != null){
                     tf.setText(f.getPath());
+                    if(f.list((dir, name)->name.equals(".git")).length > 0) {
+                        repoCB.getSelectionModel().selectLast();
+                    }
                 }
             }
         });
@@ -349,6 +352,8 @@ public class GUI extends Application {
             }
         });
         children.add(btn);
+
+        _stage.setTitle(Strings.PATH_SCREEN_TITLE);
 
         Scene s = new Scene(vbox, 600, 400);
         s.getStylesheets().add(getClass().getResource("css/main.css").toExternalForm());

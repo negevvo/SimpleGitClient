@@ -102,7 +102,7 @@ public class Ide {
 
     private static boolean openIn(String pathToProgram, String folderPath){
         try {
-            Runtime.getRuntime().exec(pathToProgram + (folderPath != null ? (" " + folderPath) : ""));
+            Runtime.getRuntime().exec(new String[]{ pathToProgram, folderPath });
         }catch(Exception e){ return false; }
         return true;
     }
