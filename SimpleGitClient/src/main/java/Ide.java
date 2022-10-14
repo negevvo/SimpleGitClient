@@ -1,3 +1,5 @@
+import com.sun.javafx.PlatformUtil;
+
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -30,13 +32,31 @@ public class Ide {
             new Ide("Android Studio", "app", new Opener() {
                 @Override
                 public boolean open(String folderPath) {
-                    return openIn("C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe", folderPath);
+                    if(PlatformUtil.isWindows()){
+                        if(System.getProperty("sun.arch.data.model").equals("32")){
+                            return openIn("C:\\Program Files\\Android\\Android Studio\\bin\\studio.exe", folderPath);
+                        }
+                        return openIn("C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe", folderPath);
+                    }
+                    if(PlatformUtil.isMac()){
+                        openIn("open -a /Applications/Android\\ Studio.app", folderPath);
+                    }
+                    if(PlatformUtil.isLinux()){
+                        openIn("/opt/android-studio/bin/studio.sh", folderPath);
+                    }
+                    return false;
                 }
             }),
             new Ide("IntelliJ IDEA", ".idea", new Opener() {
                 @Override
                 public boolean open(String folderPath) {
-                    return openIn("C:\\Program Files\\JetBrains\\IntelliJ IDEA 2021.2.1\\bin\\idea64.exe", folderPath);
+                    if(PlatformUtil.isMac()){
+                        openIn("open -a /Applications/IntelliJ\\ IDEA.app/Contents/MacOS/idea", folderPath);
+                    }
+                    if(PlatformUtil.isLinux()){
+                        openIn("/opt/idea/bin/idea.sh", folderPath);
+                    }
+                    return false;
                 }
             }),
             new Ide("Visual Studio", ".*.sln", new Opener() {
@@ -102,7 +122,7 @@ public class Ide {
 
     private static boolean openIn(String pathToProgram, String folderPath){
         try {
-            Runtime.getRuntime().exec(new String[]{ pathToProgram, folderPath });
+            Runtime.getRuntime().exec(pathToProgram + (folderPath != null ? (" " + folderPath) : ""));
         }catch(Exception e){ return false; }
         return true;
     }

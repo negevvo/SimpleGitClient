@@ -23,7 +23,7 @@ public class Strings {
             AUTO_PUSH = "Auto push (every 10 minutes)",
             IDE_BTN_TEXT = "Open in IDE",
             IDE_SCREEN_TITLE = "Open in IDE",
-            IDE_SCREEN_DESCRIPTION = "Experimental - might not work as expected.\nWINDOWS ONLY!",
+            IDE_SCREEN_DESCRIPTION = "Experimental - might not work as expected.",
             OPEN_BTN_TEXT = "Open",
             CANCEL_BTN_TEXT = "Cancel",
 

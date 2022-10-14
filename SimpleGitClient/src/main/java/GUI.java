@@ -508,7 +508,8 @@ public class GUI extends Application {
         openBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                Ide.open(ides[0].get(ideIndex[0]), chosenFolder[0]);
+                boolean openResult = Ide.open(ides[0].get(ideIndex[0]), chosenFolder[0]);
+                if(!openResult) Dialogs.makeAlert(Alert.AlertType.ERROR, "Could not open " + ides[0].get(ideIndex[0]).name, "\"Open in IDE\" is still an experimental feature, and your OS may not be fully supported yet.");
                 _stage.setScene(prev);
             }
         });
