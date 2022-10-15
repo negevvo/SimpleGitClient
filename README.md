@@ -6,7 +6,7 @@
 
 A super-simple Git client for GitHub users. ***Best for high-school students.***
 
-Pre-release 1 now available for Windows 64-bit machines, soon coming to Linux and macOS (and maybe Windows 32-bit machines).
+Version 1.0 now available!
 
 ---
 
