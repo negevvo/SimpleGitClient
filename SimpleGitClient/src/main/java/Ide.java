@@ -33,16 +33,17 @@ public class Ide {
                 @Override
                 public boolean open(String folderPath) {
                     if(PlatformUtil.isWindows()){
-                        if(System.getProperty("sun.arch.data.model").equals("32")){
-                            return openIn("C:\\Program Files\\Android\\Android Studio\\bin\\studio.exe", folderPath);
+                        String ideLocation = findLocation("C:\\Program Files\\Android\\", "Android Studio");
+                        if(ideLocation != null){
+                            String model = System.getProperty("sun.arch.data.model").equals("32") ? "" : "64";
+                            return openIn(ideLocation + "\\bin\\studio" + model + ".exe", folderPath);
                         }
-                        return openIn("C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe", folderPath);
                     }
                     if(PlatformUtil.isMac()){
-                        openIn("open -a /Applications/Android\\ Studio.app", folderPath);
+                        return openIn("open -a /Applications/Android\\ Studio.app", folderPath);
                     }
                     if(PlatformUtil.isLinux()){
-                        openIn("/opt/android-studio/bin/studio.sh", folderPath);
+                        return openIn("/opt/android-studio/bin/studio.sh", folderPath);
                     }
                     return false;
                 }
@@ -50,11 +51,15 @@ public class Ide {
             new Ide("IntelliJ IDEA", ".idea", new Opener() {
                 @Override
                 public boolean open(String folderPath) {
+                    if(PlatformUtil.isWindows()){
+                        String ideLocation = findLocation("C:\\Program Files\\JetBrains\\", "IntelliJ IDEA.*");
+                        if(ideLocation != null) return openIn(ideLocation + "\\bin\\idea64.exe", folderPath);
+                    }
                     if(PlatformUtil.isMac()){
-                        openIn("open -a /Applications/IntelliJ\\ IDEA.app/Contents/MacOS/idea", folderPath);
+                        return openIn("open -a /Applications/IntelliJ\\ IDEA.app/Contents/MacOS/idea", folderPath);
                     }
                     if(PlatformUtil.isLinux()){
-                        openIn("/opt/idea/bin/idea.sh", folderPath);
+                        return openIn("/opt/idea/bin/idea.sh", folderPath);
                     }
                     return false;
                 }
@@ -77,7 +82,7 @@ public class Ide {
                     return false;
                 }
             }),
-            new Ide("File Explorer", ".*", new Opener() {
+            new Ide("File Explorer", "", new Opener() {
                 @Override
                 public boolean open(String folderPath) {
                     try {
@@ -86,7 +91,7 @@ public class Ide {
                     return true;
                 }
             }),
-            new Ide("Copy path", ".*", new Opener() {
+            new Ide("Copy path", "", new Opener() {
                 @Override
                 public boolean open(String folderPath) {
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -95,6 +100,21 @@ public class Ide {
                 }
             })
     };
+
+    private static String findLocation(String folderPath, String regexName){
+        File folder = new File(folderPath);
+        if(!folder.exists()) return null;
+
+        Pattern pattern = Pattern.compile(regexName);
+
+        File[] files = folder.listFiles();
+        if(files != null) {
+            for(File file : files){
+                if(pattern.matcher(file.getName()).find()) return file.getAbsolutePath();
+            }
+        }
+        return null;
+    }
 
     public static ArrayList<Ide> getIdes(String folderPath){
         File folder = new File(folderPath);
@@ -106,7 +126,7 @@ public class Ide {
             for (Ide ide : IDE) {
                 Pattern pattern = Pattern.compile(ide.fileTypeRegex);
                 for (File file : files) {
-                    if (pattern.matcher(file.getName()).find()) {
+                    if (ide.fileTypeRegex.equals("") || pattern.matcher(file.getName()).find()) {
                         matchingIdes.add(ide);
                         break;
                     }

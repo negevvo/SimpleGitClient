@@ -4,6 +4,7 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
+import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
@@ -39,27 +40,34 @@ public class GitClient {
         command.call();
     }
 
-    public PushStatus push(String message) throws GitAPIException {
+    public PushStatus push(String message, ProgressMonitor monitor) throws GitAPIException {
         if(this._git == null) return PushStatus.INIT_REQUIRED;
         this.commitAll(message);
         PushCommand command = this._git.push();
         command.setCredentialsProvider(this._credentials);
         command.setPushAll();
+        if(monitor != null) command.setProgressMonitor(monitor);
         command.call();
         return PushStatus.SUCCESS;
+    }
+
+    public PushStatus push(String message) throws GitAPIException {
+        return this.push(message, null);
     }
 
     public PushStatus push() throws GitAPIException {
         return this.push(Strings.DEFAULT_COMMIT_MESSAGE);
     }
 
-    public CloneStatus cloneRepo() {
+    public CloneStatus cloneRepo(ProgressMonitor monitor) {
         CloneCommand command = Git.cloneRepository();
         command.setURI(URL);
         command.setDirectory(new File(PATH));
         command.setCredentialsProvider(this._credentials);
+        if(monitor != null) command.setProgressMonitor(monitor);
         try{
             this._git = command.call();
+            this._git.getRepository().close();
         }catch(TransportException e){
             return CloneStatus.UNAUTHORIZED;
         }catch(JGitInternalException e){
@@ -68,6 +76,10 @@ public class GitClient {
             return CloneStatus.OTHER;
         }
         return CloneStatus.SUCCESS;
+    }
+
+    public CloneStatus cloneRepo() {
+        return this.cloneRepo(null);
     }
 
     public MakeStatus make(){
@@ -83,11 +95,12 @@ public class GitClient {
         return MakeStatus.SUCCESS;
     }
 
-    public FetchStatus fetch(){
+    public FetchStatus fetch(ProgressMonitor monitor){
         if(this._git == null) return FetchStatus.INIT_REQUIRED;
         FetchCommand command = this._git.fetch();
         command.setCredentialsProvider(this._credentials);
         command.setRemote("origin");
+        if(monitor != null) command.setProgressMonitor(monitor);
         try {
             command.call();
         }catch(TransportException | InvalidRemoteException e){
@@ -98,10 +111,15 @@ public class GitClient {
         return FetchStatus.SUCCESS;
     }
 
-    public PullStatus pull(){
+    public FetchStatus fetch(){
+        return this.fetch(null);
+    }
+
+    public PullStatus pull(ProgressMonitor monitor){
         if(this._git == null) return PullStatus.INIT_REQUIRED;
         PullCommand command = this._git.pull();
         command.setCredentialsProvider(this._credentials);
+        if(monitor != null) command.setProgressMonitor(monitor);
         try {
             command.call();
         }catch(TransportException | InvalidRemoteException e){
@@ -110,5 +128,9 @@ public class GitClient {
             return PullStatus.OTHER;
         }
         return PullStatus.SUCCESS;
+    }
+
+    public PullStatus pull(){
+        return this.pull(null);
     }
 }

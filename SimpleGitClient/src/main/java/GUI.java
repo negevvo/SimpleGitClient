@@ -23,7 +23,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.awt.*;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Timer;
