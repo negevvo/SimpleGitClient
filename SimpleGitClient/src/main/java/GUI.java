@@ -497,7 +497,7 @@ public class GUI extends Application {
         ideCB.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                ideIndex[0] = t1.intValue() + (t1.intValue() > sepIndex[0] ? -1 : 0);
+                ideIndex[0] = t1.intValue() + (sepIndex[0] != 0 && t1.intValue() > sepIndex[0] ? -1 : 0);
             }
         });
         children.add(ideCB);
